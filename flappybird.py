@@ -6,23 +6,76 @@ time = 0
 
 
 class Character:
-    def __init__(self, image, x, y, w=200, h=200) -> None:
+    def __init__(self, image: str, x: float, y: float, w: float=200, h: float=200) -> None:
         self.image = pygame.image.load(image).convert_alpha()
         self.x = x
         self.y = y
-
+        self.pos=(x,y)
         self.image = pygame.transform.scale(self.image, (w, h))
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface):
         screen.blit(self.image, (self.x, self.y))
+        
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, x: float):
+        self._x = x
 
     @property
     def y(self):
         return self._y
 
     @y.setter
-    def y(self, y):
+    def y(self, y: float):
         self._y = y
+        
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, pos: tuple):
+        self._pos = pos
+
+
+class Pole:
+    def __init__(self, x: float, y: float, w: float, h: float) -> None:
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.pos = (x, y)
+
+    def draw(self, screen):
+        self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
+        pygame.draw.rect(screen, pygame.Color("black"), self.rect, 2)
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, x: float):
+        self._x = x
+
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, y: float):
+        self._y = y
+
+    @property
+    def pos(self):
+        return self._pos
+
+    @pos.setter
+    def pos(self, pos: tuple):
+        self._pos = pos
 
 
 def main():
@@ -32,13 +85,16 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("font", 20)
     player = Character("character.png", 540, 260, 150, 150)
+    pole = Pole(1200, 200, 100, 200)
     running = True
 
     while running:
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (
+                event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+            ):
                 running = False
 
             if event.type == pygame.KEYDOWN:
@@ -46,7 +102,8 @@ def main():
                     global time
                     time = 0
                     if player.y > 0:
-                        player.y = player.y - 100
+                        for _ in range(4):
+                            player.y = player.y - 25
 
         # pygame.display.update()
 
@@ -55,6 +112,8 @@ def main():
 
         # RENDER YOUR GAME HERE
         player.draw(screen)
+        pole.draw(screen)
+        pole.x -= 10
         time += 1
         if player.y < screen.get_height() - 200:
             global speed
@@ -63,7 +122,7 @@ def main():
         else:
             speed = 1
             time = 0
-            
+
         if player.y > screen.get_height() - 201:
             print("Dead")
             running = False
