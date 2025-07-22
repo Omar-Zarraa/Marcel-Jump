@@ -4,7 +4,7 @@ gravity = 10
 speed = 1
 time = 0
 
-
+#hello
 class Character:
     def __init__(
         self, image: str, x: float, y: float, w: float = 200, h: float = 200
@@ -17,8 +17,9 @@ class Character:
         self.image = pygame.transform.scale(self.image, (w, h))
 
     def draw(self, screen: pygame.Surface):
+        self.hitBox = (self.hitBox.w, self.hitBox.h)
         pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, self.pos)
 
     @property
     def x(self) -> float:
@@ -63,7 +64,9 @@ class Pole:
         self.image = pygame.transform.scale(self.image, (w, h))
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+        self.hitBox = (self.hitBox.w, self.hitBox.h)
+        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        screen.blit(self.image, self.pos)
 
     @property
     def x(self) -> float:
@@ -106,19 +109,25 @@ def characterGravity(player: Character, screen: pygame.Surface) -> bool:
     player.draw(screen)
     global time
     time += 1
-    if player.y < screen.get_height() - 200:
+    if player.pos[1] < screen.get_height() - 200:
         global speed
         speed = gravity * time / 60
-        player.y = player.y + speed
+        player.y += speed
+        player.pos = (player.x, player.y)
     else:
         speed = 1
         time = 0
 
-    if player.y > screen.get_height() - 201:
+    if player.pos[1] > screen.get_height() - 201:
         print("Dead")
         return False
 
     return True
+
+def movePole(pole:Pole,xMove:float,screen:pygame.Surface):
+    pole.draw(screen)
+    pole.x -= 10
+    pole.pos = (pole.x, pole.y)
 
 
 def main():
@@ -144,10 +153,10 @@ def main():
                 if event.key == pygame.K_SPACE:
                     global time
                     time = 0
-                    if player.y > 0:
+                    if player.pos[1] > 0:
                         for _ in range(4):
-                            player.y = player.y - 25
-
+                            player.y -= 25
+                            player.pos = (player.x, player.y)
         # pygame.display.update()
 
         # fill the screen with a color to wipe away anything from last frame
@@ -156,9 +165,10 @@ def main():
         # RENDER YOUR GAME HERE
         if not characterGravity(player, screen):
             running = False
-        pole.draw(screen)
-        # pole.x -= 10
-        print(areColliding(player, pole))
+            
+        movePole(pole,10,screen)
+       
+        # print(areColliding(player, pole))
 
         pygame.display.update()
         pygame.display.flip()
