@@ -42,16 +42,15 @@ class Character:
 
 
 class Pole:
-    def __init__(self, x: float, y: float, w: float, h: float) -> None:
+    def __init__(self,image:str, x: float, y: float, w: float, h: float) -> None:
+        self.image = pygame.image.load(image).convert_alpha()
         self.x = x
         self.y = y
-        self.w = w
-        self.h = h
         self.pos = (x, y)
+        self.image = pygame.transform.scale(self.image, (w, h))
 
     def draw(self, screen):
-        self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
-        pygame.draw.rect(screen, pygame.Color("black"), self.rect, 2)
+        screen.blit(self.image, (self.x, self.y))
 
     @property
     def x(self):
@@ -76,6 +75,9 @@ class Pole:
     @pos.setter
     def pos(self, pos: tuple):
         self._pos = pos
+        
+def areColliding(character: Character, pole: Pole) -> bool:
+    return character.pos==pole.pos
 
 
 def main():
@@ -85,7 +87,7 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("font", 20)
     player = Character("character.png", 540, 260, 150, 150)
-    pole = Pole(1200, 200, 100, 200)
+    pole = Pole("Pole.png",550,200,300,600)
     running = True
 
     while running:
@@ -113,7 +115,8 @@ def main():
         # RENDER YOUR GAME HERE
         player.draw(screen)
         pole.draw(screen)
-        pole.x -= 10
+        # pole.x -= 10
+        print(areColliding(player,pole))
         time += 1
         if player.y < screen.get_height() - 200:
             global speed
