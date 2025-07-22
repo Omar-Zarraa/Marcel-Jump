@@ -4,7 +4,8 @@ gravity = 10
 speed = 1
 time = 0
 
-#hello
+
+# hello
 class Character:
     def __init__(
         self, image: str, x: float, y: float, w: float = 200, h: float = 200
@@ -12,14 +13,32 @@ class Character:
         self.image = pygame.image.load(image).convert_alpha()
         self.x = x
         self.y = y
+        self.w = w
+        self.h = h
         self.pos = (x, y)
-        self.hitBox = (w, h)
+        self.hitBox = (w - 60, h - 60)
         self.image = pygame.transform.scale(self.image, (w, h))
 
     def draw(self, screen: pygame.Surface):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
+
+    @property
+    def w(self):
+        return self._w
+
+    @w.setter
+    def w(self, w):
+        self._w = w
+
+    @property
+    def h(self):
+        return self._h
+
+    @h.setter
+    def h(self, h):
+        self._h = h
 
     @property
     def x(self) -> float:
@@ -51,7 +70,9 @@ class Character:
 
     @hitBox.setter
     def hitBox(self, widthHeight: tuple):
-        self._hitBox = pygame.Rect(self.pos, widthHeight)
+        self._hitBox = pygame.Rect(
+            (self.pos[0] + self.w / 4, self.pos[1] + self.h / 4), widthHeight
+        )
 
 
 class Pole:
@@ -59,14 +80,32 @@ class Pole:
         self.image = pygame.image.load(image).convert_alpha()
         self.x = x
         self.y = y
+        self.w = w
+        self.h = h
         self.pos = (x, y)
-        self.hitBox = (w, h)
+        self.hitBox = (w - 200, h - 150)
         self.image = pygame.transform.scale(self.image, (w, h))
 
     def draw(self, screen):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
+
+    @property
+    def w(self):
+        return self._w
+
+    @w.setter
+    def w(self, w):
+        self._w = w
+
+    @property
+    def h(self):
+        return self._h
+
+    @h.setter
+    def h(self, h):
+        self._h = h
 
     @property
     def x(self) -> float:
@@ -98,7 +137,7 @@ class Pole:
 
     @hitBox.setter
     def hitBox(self, widthHeight: tuple):
-        self._hitBox = pygame.Rect(self.pos, widthHeight)
+        self._hitBox = pygame.Rect((self.pos[0]+ self.w/3, self.pos[1]+self.h/4), widthHeight)
 
 
 def areColliding(character: Character, pole: Pole) -> bool:
@@ -124,7 +163,8 @@ def characterGravity(player: Character, screen: pygame.Surface) -> bool:
 
     return True
 
-def movePole(pole:Pole,xMove:float,screen:pygame.Surface):
+
+def movePole(pole: Pole, xMove: float, screen: pygame.Surface):
     pole.draw(screen)
     pole.x -= 10
     pole.pos = (pole.x, pole.y)
@@ -137,7 +177,7 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("font", 20)
     player = Character("character.png", 540, 260, 150, 150)
-    pole = Pole("Pole.png", 550, 200, 300, 600)
+    pole = Pole("Pole.png", 1200, 200, 300, 600)
     running = True
 
     while running:
@@ -165,9 +205,12 @@ def main():
         # RENDER YOUR GAME HERE
         if not characterGravity(player, screen):
             running = False
-            
-        movePole(pole,10,screen)
-       
+
+        movePole(pole, 10, screen)
+        
+        if player.hitBox.colliderect(pole.hitBox):
+            running=False
+
         # print(areColliding(player, pole))
 
         pygame.display.update()
