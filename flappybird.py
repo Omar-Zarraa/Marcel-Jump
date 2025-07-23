@@ -23,7 +23,7 @@ class Character:
 
     def draw(self, screen: pygame.Surface):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
 
     @property
@@ -86,12 +86,12 @@ class Pole:
         self.w = w
         self.h = h
         self.pos = (x, y)
-        self.hitBox = (w - 200, h - 150)
+        self.hitBox = (w - 200, h - 300)
         self.image = pygame.transform.scale(self.image, (w, h))
 
     def draw(self, screen):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
 
     @property
@@ -169,21 +169,31 @@ def characterGravity(player: Character, screen: pygame.Surface) -> bool:
 # Function to move the poles across the screen
 def movePole(xMove: float, screen: pygame.Surface, poles: list):
     for pole in poles:
-        pole.draw(screen)
-        pole.x -= 10
-        pole.pos = (pole.x, pole.y)
+        pole[0].draw(screen)
+        pole[0].x -= 10
+        pole[0].pos = (pole[0].x, pole[0].y)
+        pole[1].draw(screen)
+        pole[1].x -= 10
+        pole[1].pos = (pole[1].x, pole[1].y)
 
 
 def makePoles(poles: list):
     for _ in range(5):
         global stagger
-        poles.append(Pole("Pole.png", 2000 + stagger, 350, 300, 600))
+        poles.append(
+            [
+                Pole("Pole.png", 2000 + stagger, 350, 300, 600),
+                Pole("PoleR.png", 2000 + stagger, -200, 300, 600),
+            ]
+        )
         stagger += 500
 
 
-def checkCollision(poles: list[Pole], player: Character):
+def checkCollision(poles: list[list[Pole]], player: Character):
     for pole in poles:
-        if player.hitBox.colliderect(pole.hitBox):
+        if player.hitBox.colliderect(pole[0].hitBox) or player.hitBox.colliderect(
+            pole[1].hitBox
+        ):
             return True
     return False
 
@@ -226,10 +236,17 @@ def main():
         # RENDER YOUR GAME HERE
         global stagger, deletions
         if len(poles) > 0:
-            if poles[0].x < 0:
+            if poles[0][0].x < 0:
                 del poles[0]
                 poles.append(
-                    Pole("Pole.png", poles[len(poles) - 1].x + 500, 350, 300, 600)
+                    [
+                        Pole(
+                            "Pole.png", poles[len(poles) - 1][0].x + 500, 350, 300, 600
+                        ),
+                        Pole(
+                            "PoleR.png", poles[len(poles) - 1][1].x + 500, -200, 300, 600
+                        ),
+                    ]
                 )
 
         if not characterGravity(player, screen):
