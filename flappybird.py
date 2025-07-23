@@ -3,9 +3,11 @@ import pygame
 gravity = 10
 speed = 1
 time = 0
+stagger = 0
+deletions = 0
 
 
-# hello
+# Character class which the 'player' object is an instance of
 class Character:
     def __init__(
         self, image: str, x: float, y: float, w: float = 200, h: float = 200
@@ -21,7 +23,7 @@ class Character:
 
     def draw(self, screen: pygame.Surface):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
 
     @property
@@ -75,6 +77,7 @@ class Character:
         )
 
 
+# Pole class which the poles are objects of
 class Pole:
     def __init__(self, image: str, x: float, y: float, w: float, h: float) -> None:
         self.image = pygame.image.load(image).convert_alpha()
@@ -88,7 +91,7 @@ class Pole:
 
     def draw(self, screen):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
+        pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
 
     @property
@@ -137,13 +140,12 @@ class Pole:
 
     @hitBox.setter
     def hitBox(self, widthHeight: tuple):
-        self._hitBox = pygame.Rect((self.pos[0]+ self.w/3, self.pos[1]+self.h/4), widthHeight)
+        self._hitBox = pygame.Rect(
+            (self.pos[0] + self.w / 3, self.pos[1] + self.h / 4), widthHeight
+        )
 
 
-def areColliding(character: Character, pole: Pole) -> bool:
-    return character.pos == pole.pos
-
-
+# Function that enables character gravity and returns False if the character hit the ground
 def characterGravity(player: Character, screen: pygame.Surface) -> bool:
     player.draw(screen)
     global time
@@ -164,10 +166,26 @@ def characterGravity(player: Character, screen: pygame.Surface) -> bool:
     return True
 
 
-def movePole(pole: Pole, xMove: float, screen: pygame.Surface):
-    pole.draw(screen)
-    pole.x -= 10
-    pole.pos = (pole.x, pole.y)
+# Function to move the poles across the screen
+def movePole(xMove: float, screen: pygame.Surface, poles: list):
+    for pole in poles:
+        pole.draw(screen)
+        pole.x -= 10
+        pole.pos = (pole.x, pole.y)
+
+
+def makePoles(poles: list):
+    for _ in range(5):
+        global stagger
+        poles.append(Pole("Pole.png", 2000 + stagger, 350, 300, 600))
+        stagger += 500
+
+
+def checkCollision(poles: list[Pole], player: Character):
+    for pole in poles:
+        if player.hitBox.colliderect(pole.hitBox):
+            return True
+    return False
 
 
 def main():
@@ -177,8 +195,11 @@ def main():
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("font", 20)
     player = Character("character.png", 540, 260, 150, 150)
-    pole = Pole("Pole.png", 1200, 200, 300, 600)
+    poles = []
+    # pole = Pole("Pole.png", 1200, 200, 300, 600)
     running = True
+
+    makePoles(poles)
 
     while running:
         # poll for events
@@ -203,13 +224,22 @@ def main():
         screen.fill("white")
 
         # RENDER YOUR GAME HERE
+        global stagger, deletions
+        if len(poles) > 0:
+            if poles[0].x < 0:
+                del poles[0]
+                poles.append(
+                    Pole("Pole.png", poles[len(poles) - 1].x + 500, 350, 300, 600)
+                )
+
         if not characterGravity(player, screen):
             running = False
 
-        movePole(pole, 10, screen)
-        
-        if player.hitBox.colliderect(pole.hitBox):
-            running=False
+        movePole(10, screen, poles)
+
+        if checkCollision(poles, player):
+            print("Collided")
+            running = False
 
         # print(areColliding(player, pole))
 
