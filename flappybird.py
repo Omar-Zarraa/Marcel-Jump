@@ -1,5 +1,7 @@
 import pygame
+import sys
 
+pygame.init()
 gravity = 10
 speed = 1
 time = 0
@@ -177,6 +179,46 @@ def movePole(xMove: float, screen: pygame.Surface, poles: list):
         pole[1].pos = (pole[1].x, pole[1].y)
 
 
+def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos:tuple):
+    pygame.init()
+
+    global stagger, time
+    stagger = time = 0
+    clock = pygame.time.Clock()
+    running = True
+
+    screen.fill("White")
+
+    gameOver = pygame.image.load(image).convert_alpha()
+    gameOver = pygame.transform.scale(gameOver, (w, h))
+    restart = pygame.Rect((500, 280), (200, 100))
+    quit = pygame.Rect((500, 435), (200, 100))
+
+    screen.blit(gameOver, pos)
+    # pygame.draw.rect(screen, pygame.Color("Black"), restart)
+    # pygame.draw.rect(screen, pygame.Color("Black"), quit)
+
+    while running:
+        try:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+                ):
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if restart.collidepoint(event.pos):
+                        main()
+                    elif quit.collidepoint(event.pos):
+                        sys.exit()
+
+            pygame.display.update()
+            pygame.display.flip()
+
+            clock.tick(60)
+        except pygame.error:
+            pygame.quit()
+
+
 def makePoles(poles: list):
     for _ in range(5):
         global stagger
@@ -218,7 +260,7 @@ def main():
             if event.type == pygame.QUIT or (
                 event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
             ):
-                running = False
+                return
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
@@ -244,7 +286,11 @@ def main():
                             "Pole.png", poles[len(poles) - 1][0].x + 500, 350, 300, 600
                         ),
                         Pole(
-                            "PoleR.png", poles[len(poles) - 1][1].x + 500, -200, 300, 600
+                            "PoleR.png",
+                            poles[len(poles) - 1][1].x + 500,
+                            -200,
+                            300,
+                            600,
                         ),
                     ]
                 )
@@ -258,14 +304,12 @@ def main():
             print("Collided")
             running = False
 
-        # print(areColliding(player, pole))
-
         pygame.display.update()
         pygame.display.flip()
 
         clock.tick(60)  # limits FPS to 60
 
-    pygame.quit()
+    deathScreen(screen, "GameOver.png", 720, 1000,(250,-150))
 
 
 if __name__ == "__main__":
