@@ -1,4 +1,4 @@
-import pygame,sys,random
+import pygame, sys, random
 
 pygame.init()
 gravity = 10
@@ -24,7 +24,6 @@ class Character:
 
     def draw(self, screen: pygame.Surface):
         self.hitBox = (self.hitBox.w, self.hitBox.h)
-        # pygame.draw.rect(screen, pygame.Color("black"), self.hitBox)
         screen.blit(self.image, self.pos)
 
     @property
@@ -161,7 +160,6 @@ def characterGravity(player: Character, screen: pygame.Surface) -> bool:
         time = 0
 
     if player.pos[1] > screen.get_height() - 201:
-        print("Dead")
         return False
 
     return True
@@ -178,13 +176,55 @@ def movePole(xMove: float, screen: pygame.Surface, poles: list):
         pole[1].pos = (pole[1].x, pole[1].y)
 
 
-def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos:tuple):
+def mainMenu(image: str):
+    pygame.init()
+    screen = pygame.display.set_mode((1280, 720))
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont("font", 20)
+
+    playButton = pygame.image.load(image).convert_alpha()
+    playButton = pygame.transform.scale(playButton, (700, 450))
+    buttonRect=pygame.Rect((520,290),(250,150))
+    
+    screen.fill("white")
+    
+    screen.blit(playButton,(280,130))
+    
+    while True:
+        try:
+            flag =True
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or (
+                    event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
+                ):
+                    sys.exit()
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    flag=False
+                    break
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if buttonRect.collidepoint(event.pos):
+                        flag=False
+                        break
+
+            pygame.display.update()
+            pygame.display.flip()
+
+            clock.tick(60)
+            if not flag:
+                break
+        except pygame.error:
+            pygame.quit()
+            sys.exit()
+    main()
+
+
+def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos: tuple):
     pygame.init()
 
     global stagger, time
     stagger = time = 0
     clock = pygame.time.Clock()
-    running = True
 
     screen.fill("White")
 
@@ -194,18 +234,16 @@ def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos:tupl
     quit = pygame.Rect((500, 435), (200, 100))
 
     screen.blit(gameOver, pos)
-    # pygame.draw.rect(screen, pygame.Color("Black"), restart)
-    # pygame.draw.rect(screen, pygame.Color("Black"), quit)
-
-    while running:
+    
+    while True:
         try:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (
                     event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
                 ):
                     sys.exit()
-                    
-                if event.type==pygame.KEYDOWN and event.key==pygame.K_RETURN:
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     main()
                 if event.type == pygame.MOUSEBUTTONUP:
                     if restart.collidepoint(event.pos):
@@ -224,11 +262,11 @@ def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos:tupl
 def makePoles(poles: list):
     for _ in range(5):
         global stagger
-        y=random.randint(250,450)
+        y = random.randint(250, 450)
         poles.append(
             [
                 Pole("Pole.png", 2000 + stagger, y, 300, 600),
-                Pole("PoleR.png", 2000 + stagger, y-550, 300, 600),
+                Pole("PoleR.png", 2000 + stagger, y - 550, 300, 600),
             ]
         )
         stagger += 500
@@ -263,16 +301,15 @@ def main():
             if event.type == pygame.QUIT or (
                 event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
             ):
-                return
+                sys.exit()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     global time
                     time = 0
                     if player.pos[1] > 0:
-                        for _ in range(4):
-                            player.y -= 25
-                            player.pos = (player.x, player.y)
+                        player.y -= 100
+                        player.pos = (player.x, player.y)
         # pygame.display.update()
 
         # fill the screen with a color to wipe away anything from last frame
@@ -283,16 +320,14 @@ def main():
         if len(poles) > 0:
             if poles[0][0].x < 0:
                 del poles[0]
-                y=random.randint(250,450)
+                y = random.randint(250, 450)
                 poles.append(
                     [
-                        Pole(
-                            "Pole.png", poles[len(poles) - 1][0].x + 500, y, 300, 600
-                        ),
+                        Pole("Pole.png", poles[len(poles) - 1][0].x + 500, y, 300, 600),
                         Pole(
                             "PoleR.png",
                             poles[len(poles) - 1][1].x + 500,
-                            y-550,
+                            y - 550,
                             300,
                             600,
                         ),
@@ -305,7 +340,6 @@ def main():
         movePole(10, screen, poles)
 
         if checkCollision(poles, player):
-            print("Collided")
             running = False
 
         pygame.display.update()
@@ -313,8 +347,9 @@ def main():
 
         clock.tick(60)  # limits FPS to 60
 
-    deathScreen(screen, "GameOver.png", 720, 1000,(250,-150))
+    deathScreen(screen, "GameOver.png", 720, 1000, (250, -150))
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    mainMenu("Play.png")
