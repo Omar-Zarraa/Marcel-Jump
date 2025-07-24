@@ -1,11 +1,12 @@
 import pygame, sys, random
 
 pygame.init()
+
+# Global variables
 gravity = 10
 speed = 1
 time = 0
 stagger = 0
-deletions = 0
 
 
 # Character class which the 'player' object is an instance of
@@ -166,7 +167,7 @@ def characterGravity(player: Character, screen: pygame.Surface) -> bool:
 
 
 # Function to move the poles across the screen
-def movePole(xMove: float, screen: pygame.Surface, poles: list):
+def movePole(xMove: float, screen: pygame.Surface, poles: list) -> None:
     for pole in poles:
         pole[0].draw(screen)
         pole[0].x -= 10
@@ -176,7 +177,8 @@ def movePole(xMove: float, screen: pygame.Surface, poles: list):
         pole[1].pos = (pole[1].x, pole[1].y)
 
 
-def mainMenu(image: str):
+# Function that shows the starting screen with the 'play button'
+def mainMenu(image: str) -> None:
     pygame.init()
     screen = pygame.display.set_mode((1280, 720))
     clock = pygame.time.Clock()
@@ -184,15 +186,15 @@ def mainMenu(image: str):
 
     playButton = pygame.image.load(image).convert_alpha()
     playButton = pygame.transform.scale(playButton, (700, 450))
-    buttonRect=pygame.Rect((520,290),(250,150))
-    
+    buttonRect = pygame.Rect((520, 290), (250, 150))
+
     screen.fill("white")
-    
-    screen.blit(playButton,(280,130))
-    
+
+    screen.blit(playButton, (280, 130))
+
     while True:
         try:
-            flag =True
+            flag = True
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (
                     event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
@@ -200,11 +202,11 @@ def mainMenu(image: str):
                     sys.exit()
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                    flag=False
+                    flag = False
                     break
                 if event.type == pygame.MOUSEBUTTONUP:
                     if buttonRect.collidepoint(event.pos):
-                        flag=False
+                        flag = False
                         break
 
             pygame.display.update()
@@ -219,7 +221,10 @@ def mainMenu(image: str):
     main()
 
 
-def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos: tuple):
+# Function that shows the 'Game Over' screen with the 'restart' and 'quit' buttons
+def deathScreen(
+    screen: pygame.Surface, image: str, w: float, h: float, pos: tuple
+) -> None:
     pygame.init()
 
     global stagger, time
@@ -234,7 +239,7 @@ def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos: tup
     quit = pygame.Rect((500, 435), (200, 100))
 
     screen.blit(gameOver, pos)
-    
+
     while True:
         try:
             for event in pygame.event.get():
@@ -259,7 +264,8 @@ def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos: tup
             pygame.quit()
 
 
-def makePoles(poles: list):
+# Functions to create the initial 5 poles of the game
+def makePoles(poles: list) -> None:
     for _ in range(5):
         global stagger
         y = random.randint(250, 450)
@@ -272,7 +278,8 @@ def makePoles(poles: list):
         stagger += 500
 
 
-def checkCollision(poles: list[list[Pole]], player: Character):
+# Function that checks whether the player has collided with a pole
+def checkCollision(poles: list[list[Pole]], player: Character) -> bool:
     for pole in poles:
         if player.hitBox.colliderect(pole[0].hitBox) or player.hitBox.colliderect(
             pole[1].hitBox
@@ -281,7 +288,8 @@ def checkCollision(poles: list[list[Pole]], player: Character):
     return False
 
 
-def main():
+# The main function of the game
+def main() -> None:
     # setup
     pygame.init()
     screen = pygame.display.set_mode((1280, 720))
@@ -351,5 +359,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
     mainMenu("Play.png")
