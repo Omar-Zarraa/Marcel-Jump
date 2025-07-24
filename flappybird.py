@@ -1,5 +1,4 @@
-import pygame
-import sys
+import pygame,sys,random
 
 pygame.init()
 gravity = 10
@@ -205,6 +204,9 @@ def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos:tupl
                     event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
                 ):
                     sys.exit()
+                    
+                if event.type==pygame.KEYDOWN and event.key==pygame.K_RETURN:
+                    main()
                 if event.type == pygame.MOUSEBUTTONUP:
                     if restart.collidepoint(event.pos):
                         main()
@@ -222,10 +224,11 @@ def deathScreen(screen: pygame.Surface, image: str, w: float, h: float, pos:tupl
 def makePoles(poles: list):
     for _ in range(5):
         global stagger
+        y=random.randint(250,450)
         poles.append(
             [
-                Pole("Pole.png", 2000 + stagger, 350, 300, 600),
-                Pole("PoleR.png", 2000 + stagger, -200, 300, 600),
+                Pole("Pole.png", 2000 + stagger, y, 300, 600),
+                Pole("PoleR.png", 2000 + stagger, y-550, 300, 600),
             ]
         )
         stagger += 500
@@ -280,15 +283,16 @@ def main():
         if len(poles) > 0:
             if poles[0][0].x < 0:
                 del poles[0]
+                y=random.randint(250,450)
                 poles.append(
                     [
                         Pole(
-                            "Pole.png", poles[len(poles) - 1][0].x + 500, 350, 300, 600
+                            "Pole.png", poles[len(poles) - 1][0].x + 500, y, 300, 600
                         ),
                         Pole(
                             "PoleR.png",
                             poles[len(poles) - 1][1].x + 500,
-                            -200,
+                            y-550,
                             300,
                             600,
                         ),
